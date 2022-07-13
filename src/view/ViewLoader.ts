@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { getAPIUserGender } from '../config';
 import { Message, CommonMessage } from './messages/messageTypes';
-import { tranlate } from '../service/translation';
+import { translate } from '../service/translation';
 import { LocalStorageService } from '../storage/dataStorage';
 import { readFile } from 'fs';
 
@@ -39,7 +39,7 @@ export class ViewLoader {
           vscode.window.showInformationMessage(`Received message from Webview: ${text}`);
         } else if (message.type === 'TranlateOne') {
           const optionValue = message.payload.to;
-          tranlate(message.payload.needTranslate, optionValue)
+          translate(message.payload.needTranslate, optionValue)
             .then(res => {
               this.panel.webview.postMessage({
                 type: 'TRANSLATEONE',
@@ -87,7 +87,7 @@ export class ViewLoader {
           }
           const todoList = message.payload.todoList;
           const promiseList = todoList.map((item, index) =>
-            tranlate(message.payload.needTranslate, item.optionValue)
+            translate(message.payload.needTranslate, item.optionValue)
           );
           Promise.all(promiseList)
             .then(resList => {

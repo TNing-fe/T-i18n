@@ -18,6 +18,7 @@
   "activationEvents": [
     "onWebviewPanel:catCoding",
     "onCommand:termix-i18n.translation",
+    "onCommand:termix-i18n.quickTranslate",
     "onStartupFinished"
   ],
   "main": "./out/src/extension.js",
@@ -36,6 +37,10 @@
         "command": "extension.sendMessage",
         "title": "Send Message to Webview",
         "category": "Webview React"
+      },
+      {
+        "command": "termix-i18n.quickTranslate",
+        "title": "ter-quickTranslate"
       }
     ],
     "keybindings": [
@@ -43,6 +48,12 @@
         "command": "termix-i18n.translation",
         "key": "ctrl+t",
         "mac": "cmd+t"
+      },
+      {
+        "key": "ctrl+y",
+        "mac": "cmd+y",
+        "command": "termix-i18n.quickTranslate",
+        "when": "editorTextFocus"
       }
     ],
     "configuration": {
