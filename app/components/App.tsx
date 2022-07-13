@@ -4,7 +4,10 @@ import { routes } from '../routes/config';
 import { VSCodeTextField,VSCodeButton,VSCodeOption, VSCodeDropdown } from '@vscode/webview-ui-toolkit/react';
 import { RouteWithSubRoutes } from '../routes/RouteWithSubRoutes';
 import { MessagesContext } from '../context/MessageContext';
-import { CommonMessage, Message, ReloadMessage, TranlateOneMessage, SaveTodoList } from '../../src/view/messages/messageTypes';
+import { CommonMessage, Message, ReloadMessage, TranlateOneMessage, SaveTodoList, TodoList } from '../../src/view/messages/messageTypes';
+
+
+
 
 export const App = () => {
   const checkLan = [{name: '选择语言',type:''},{name: '英语',type:'en'},{name: '西班牙语',type:'es'},{name: '泰语',type:'th'},{name: '繁体中文',type:'zh-CHT'}];
@@ -14,7 +17,7 @@ export const App = () => {
   const [log, setLog] = useState('zhangle');
   const [log2, setLog2] = useState('lelele');
   const [text, setText] = useState('Terminus');
-  const [todoList, updateTodoList] = useState([{ targetValue:"", optionValue:"",fileType:"",filePath:""}]);
+  const [todoList, updateTodoList] = useState<TodoList[]>([{ targetValue:"", optionValue:"",fileType:"",filePath:""}]);
   const handleMessagesFromExtension = useCallback(
     (event: MessageEvent<Message>) => {
       if (event.data.type === 'COMMON') {
@@ -78,7 +81,7 @@ export const App = () => {
   const addItemTolist = () => {
     updateTodoList([...todoList,{ targetValue:"", optionValue:"",fileType:"",filePath:""}]);
   };
-  const changeProp = (todoindex:number,value:any,prop:any) => {
+  const changeProp = (todoindex:number,value:string,prop:string) => {
       updateTodoList(todoList.map((item,_index) =>  {
         if (_index === todoindex) {
           item[prop] = value;
@@ -109,9 +112,9 @@ export const App = () => {
     >
       <button onClick={handleReloadWebview}>Reload Webview</button>
       <br />
-      <VSCodeTextField  value={text} onInput={e => setText(e.target.value)} style={{width:'400px'}} >添加的键名</VSCodeTextField> 
+      <VSCodeTextField  value={text} onInput={e => setText((e.target as HTMLInputElement).value || '')} style={{width:'400px'}} >添加的键名</VSCodeTextField> 
       <br />
-      <VSCodeTextField  value={needTranslate} onInput={e => setNeedTranslate(e.target.value)}  placeholder='需要翻译的语句'/>
+      <VSCodeTextField  value={needTranslate} onInput={e => setNeedTranslate((e.target as HTMLInputElement).value)}  placeholder='需要翻译的语句'/>
       <VSCodeButton disabled={isOnSave} style={{position:'relative',bottom:"12px"}} onClick={addItemTolist}>+</VSCodeButton>
       <br />   
         {
@@ -132,7 +135,7 @@ export const App = () => {
               <VSCodeOption value='json' onClick={() => changeProp(todoindex,'json','fileType')}>JSON</VSCodeOption>
             </VSCodeDropdown>
             <br />
-            <VSCodeTextField disabled={isOnSave} value={item.filePath} placeholder="目标文件绝对路径" type="text" onChange={(e) => changeProp(todoindex,e.target.value,'filePath')} id={`file${todoindex}`} style={{color:'#fff',backgroundColor:"#000"}}/>
+            <VSCodeTextField disabled={isOnSave} value={item.filePath} placeholder="目标文件绝对路径" type="text" onChange={(e) => changeProp(todoindex,(e.target as HTMLInputElement).value,'filePath')} id={`file${todoindex}`} style={{color:'#fff',backgroundColor:"#000"}}/>
             <VSCodeButton style={{ position:'relative',bottom:"12px"}} onClick={() => translateOne(todoindex,todoindex)} >翻译</VSCodeButton>
             <VSCodeButton style={{ position:'relative',bottom:"12px"}} onClick={() => delOne(todoindex)}>删除</VSCodeButton>
           </div>

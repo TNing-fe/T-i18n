@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ViewLoader } from './view/ViewLoader';
-import { CommonMessage } from './view/messages/messageTypes';
+import { CommonMessage, TodoList } from './view/messages/messageTypes';
 import { LocalStorageService } from './storage/dataStorage';
 
 
@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
         const focusText = editor.document.getText(selection);
         ViewLoader.showWebview(context);
         const todoList = storageManager.getValue("todoList") || [{ targetValue:"", optionValue:"",fileType:"",filePath:""}];
-        ViewLoader.postMessageToWebview({type:'INIT',payload: {focusText,todoList:todoList.map(item => ({...item,targetValue:""}))}});
+        ViewLoader.postMessageToWebview({type:'INIT',payload: {focusText,todoList:(todoList as TodoList[]).map(item => ({...item,targetValue:""}))}});
       }  
 
     }),

@@ -21,3 +21,10 @@ export interface SaveTodoList extends Message {
   type: 'SaveTodoList';
   payload: any;
 }
+
+export interface TodoList {
+  [targetValue:string]:string, 
+  optionValue:string,
+  fileType:string,
+  filePath:string
+}
