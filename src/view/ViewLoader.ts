@@ -6,6 +6,11 @@ import { tranlate } from '../service/translation';
 import { LocalStorageService } from '../storage/dataStorage';
 import { readFile } from 'fs';
 
+interface ResList {
+  data : {
+  translation: string[]
+  }
+}
 export class ViewLoader {
   public static currentPanel?: vscode.WebviewPanel;
   private panel: vscode.WebviewPanel;
@@ -81,9 +86,10 @@ export class ViewLoader {
           const todoList = message.payload.todoList;   
           const promiseList = todoList.map((item,index) => tranlate(message.payload.needTranslate,item.optionValue));
           Promise.all(promiseList).then((resList) => {
+            console.log('resList: ', resList);
             return resList.map((_item,index) => {
-              todoList[index].targetValue = _item.data.translation[0];
-              return _item.data.translation[0];
+              todoList[index].targetValue = (_item as ResList).data.translation[0];
+              return (_item as ResList).data.translation[0];
             });
           }).then(res => {
             // console.log('res:+++---- ', todoList);
