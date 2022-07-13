@@ -16,11 +16,16 @@ export class ViewLoader {
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.disposables = [];
-    this.panel = vscode.window.createWebviewPanel('Terminus', 'Terminus-i18n', vscode.ViewColumn.Five, {
-      enableScripts: true,
-      retainContextWhenHidden: true,
-      localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app'))],
-    });
+    this.panel = vscode.window.createWebviewPanel(
+      'Terminus',
+      'Terminus-i18n',
+      vscode.ViewColumn.Five,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app'))],
+      }
+    );
     this.storageManager = new LocalStorageService(context.workspaceState);
     // render webview
     this.renderWebview();
@@ -34,17 +39,19 @@ export class ViewLoader {
           vscode.window.showInformationMessage(`Received message from Webview: ${text}`);
         } else if (message.type === 'TranlateOne') {
           const optionValue = message.payload.to;
-          tranlate(message.payload.needTranslate,optionValue).then((res) => {
-            this.panel.webview.postMessage({
-              type:'TRANSLATEONE',
-              payload:{
-                targetValue:res.data.translation[0],
-                todoindex:message.payload.todoindex
-              }
+          tranlate(message.payload.needTranslate, optionValue)
+            .then(res => {
+              this.panel.webview.postMessage({
+                type: 'TRANSLATEONE',
+                payload: {
+                  targetValue: res.data.translation[0],
+                  todoindex: message.payload.todoindex,
+                },
+              });
+            })
+            .catch(e => {
+              console.log('error', e);
             });
-          }).catch(e => {
-            console.log("error",e);
-          });
           vscode.window.showInformationMessage(`翻译语言 ${optionValue}`);
         } else if (message.type === 'SaveTodoList') {
           const todoList = message.payload.todoList;
@@ -69,49 +76,56 @@ export class ViewLoader {
           }
           try {
             this.storageManager.setValue('todoList', todoList);
-          } catch (error) {            
+          } catch (error) {
             console.log('error: ', error);
           }
           vscode.window.showInformationMessage(`保存成功`);
-        } else if(message.type === 'TRANSLATEALL') {
+        } else if (message.type === 'TRANSLATEALL') {
           if (message.payload.needTranslate === '') {
             vscode.window.showInformationMessage(`需要翻译的语句不能为空`);
             return;
           }
-          const todoList = message.payload.todoList;   
-          const promiseList = todoList.map((item,index) => tranlate(message.payload.needTranslate,item.optionValue));
-          Promise.all(promiseList).then((resList) => {
-            return resList.map((_item,index) => {
-              todoList[index].targetValue = _item.data.translation[0];
-              return _item.data.translation[0];
+          const todoList = message.payload.todoList;
+          const promiseList = todoList.map((item, index) =>
+            tranlate(message.payload.needTranslate, item.optionValue)
+          );
+          Promise.all(promiseList)
+            .then(resList => {
+              return resList.map((_item: Record<string, any>, index) => {
+                const [translation = ''] = _item?.data?.translation || [];
+                todoList[index].targetValue = translation;
+                return translation;
+              });
+            })
+            .then(res => {
+              this.panel.webview.postMessage({ type: 'TRANSLATEALL', payload: todoList });
             });
-          }).then(res => {
-            // console.log('res:+++---- ', todoList);
-            this.panel.webview.postMessage({ type:"TRANSLATEALL",payload:todoList });
-          });
-        } else if (message.type === 'INSERT'){
+        } else if (message.type === 'INSERT') {
           const folderUri = vscode.workspace.workspaceFolders[0].uri;
           message.payload.todoList.forEach(item => {
-            const fileUri = folderUri.with({ path: path.posix.join(folderUri.path,  item.filePath) });
-            vscode.workspace.fs.readFile(fileUri).then((readBuffer) => {
+            const fileUri = folderUri.with({
+              path: path.posix.join(folderUri.path, item.filePath),
+            });
+            vscode.workspace.fs.readFile(fileUri).then(readBuffer => {
               // 读到的文件内容
               if (item.fileType === 'json') {
                 const readContent = JSON.parse(Buffer.from(readBuffer).toString('utf8'));
                 console.log('readContent: ', readContent);
                 readContent[message.payload.text] = item.targetValue;
-                vscode.workspace.fs.writeFile(fileUri,Buffer.from(JSON.stringify(readContent,null,'\t'),'utf8')).then((res) => {
-                  console.log('res+++++',res);
-                  vscode.window.showInformationMessage(`插入成功`);
-                });
+                vscode.workspace.fs
+                  .writeFile(fileUri, Buffer.from(JSON.stringify(readContent, null, '\t'), 'utf8'))
+                  .then(res => {
+                    console.log('res+++++', res);
+                    vscode.window.showInformationMessage(`插入成功`);
+                  });
               }
               if (item.fileType === 'object') {
                 const readContent = Buffer.from(readBuffer).toString('utf8');
-                const tempContent =  readContent.split('{');
+                const tempContent = readContent.split('{');
                 const preContent = tempContent[0];
                 console.log('preContent: ', preContent);
-                const objectContent = JSON.parse('{'+tempContent[1]);
+                const objectContent = JSON.parse('{' + tempContent[1]);
                 console.log('objectContent: ', objectContent);
-                
               }
             });
           });
