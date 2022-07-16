@@ -1,14 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { MemoryRouter as Router, Link, Switch } from 'react-router-dom';
-import { routes } from '../routes/config';
 import {
   VSCodeTextField,
   VSCodeButton,
   VSCodeOption,
   VSCodeDropdown,
 } from '@vscode/webview-ui-toolkit/react';
-import { RouteWithSubRoutes } from '../routes/RouteWithSubRoutes';
-import { MessagesContext } from '../context/MessageContext';
 import {
   CommonMessage,
   Message,
@@ -136,7 +132,7 @@ export const App = () => {
   };
 
   return (
-    <Router initialEntries={['/', '/about', '/message', '/message/received', '/message/send']}>
+    <div>
       <button onClick={handleReloadWebview}>Reload Webview</button>
       <br />
       <VSCodeTextField
@@ -234,13 +230,6 @@ export const App = () => {
       {log}
       <br />
       {log2}
-      <MessagesContext.Provider value={messagesFromExtension}>
-        <Switch>
-          {routes.map((route, i) => (
-            <RouteWithSubRoutes key={i} {...route} />
-          ))}
-        </Switch>
-      </MessagesContext.Provider>
-    </Router>
+    </div>
   );
 };

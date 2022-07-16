@@ -110,12 +110,10 @@ export class ViewLoader {
               // 读到的文件内容
               if (item.fileType === 'json') {
                 const readContent = JSON.parse(Buffer.from(readBuffer).toString('utf8'));
-                console.log('readContent: ', readContent);
                 readContent[message.payload.text] = item.targetValue;
                 vscode.workspace.fs
                   .writeFile(fileUri, Buffer.from(JSON.stringify(readContent, null, '\t'), 'utf8'))
                   .then(res => {
-                    console.log('res+++++', res);
                     vscode.window.showInformationMessage(`插入成功`);
                   });
               }
