@@ -1,6 +1,7 @@
 {
   "name": "vscode-webview-react-boilerplate",
   "displayName": "VSCode webview react boilerplate",
+  "icon": "img/logo.svg",
   "description": "Boilerplate for developing webview using react in VSCode extension",
   "version": "0.0.1",
   "engines": {
@@ -23,6 +24,22 @@
   ],
   "main": "./out/src/extension.js",
   "contributes": {
+    "productIconThemes": [
+      {
+        "id": "TerminuseTranslation",
+        "label": "Terminus translation",
+        "path": "img/logo.svg"
+      }
+    ],
+    "webviews": [
+      {
+        "viewType": "markdown.preview",
+        "icon": {
+          "light": "./logo.svg",
+          "dark": "./logo.svg"
+        }
+      }
+    ],
     "commands": [
       {
         "command": "termix-i18n.translation",

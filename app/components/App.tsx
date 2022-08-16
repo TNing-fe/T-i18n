@@ -23,10 +23,13 @@ interface TodoListItem extends Record<string, any> {
 export const App = () => {
   const checkLan = [
     { name: '选择语言', type: '' },
+    { name: '简体中文', type: 'zh-CHS' },
     { name: '英语', type: 'en' },
     { name: '西班牙语', type: 'es' },
     { name: '泰语', type: 'th' },
     { name: '繁体中文', type: 'zh-CHT' },
+    { name: '马来语', type: 'ms' },
+
   ];
   const [isOnSave, setIsOnSave] = useState(false);
   const [messagesFromExtension, setMessagesFromExtension] = useState<string[]>([]);
@@ -188,7 +191,7 @@ export const App = () => {
               value="object"
               onClick={() => changeProp(todoindex, 'object', 'fileType')}
             >
-              Object
+              JS 
             </VSCodeOption>
             <VSCodeOption value="json" onClick={() => changeProp(todoindex, 'json', 'fileType')}>
               JSON
@@ -226,10 +229,10 @@ export const App = () => {
         <VSCodeButton onClick={translateAll}>一键翻译</VSCodeButton>
         <VSCodeButton onClick={onInsert}>插入</VSCodeButton>
       </div>
-      <br />
+      {/* <br />
       {log}
       <br />
-      {log2}
+      {log2} */}
     </div>
   );
 };

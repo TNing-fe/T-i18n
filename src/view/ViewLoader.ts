@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { getAPIUserGender } from '../config';
 import { Message, CommonMessage } from './messages/messageTypes';
 import { translate } from '../service/translation';
 import { LocalStorageService } from '../storage/dataStorage';
@@ -18,7 +17,7 @@ export class ViewLoader {
     this.disposables = [];
     this.panel = vscode.window.createWebviewPanel(
       'Terminus',
-      'Terminus-i18n',
+      'Terminus',
       vscode.ViewColumn.Five,
       {
         enableScripts: true,
@@ -102,31 +101,43 @@ export class ViewLoader {
             });
         } else if (message.type === 'INSERT') {
           const folderUri = vscode.workspace.workspaceFolders[0].uri;
-          message.payload.todoList.forEach(item => {
-            const fileUri = folderUri.with({
-              path: path.posix.join(folderUri.path, item.filePath),
-            });
-            vscode.workspace.fs.readFile(fileUri).then(readBuffer => {
-              // 读到的文件内容
-              if (item.fileType === 'json') {
-                const readContent = JSON.parse(Buffer.from(readBuffer).toString('utf8'));
-                readContent[message.payload.text] = item.targetValue;
-                vscode.workspace.fs
-                  .writeFile(fileUri, Buffer.from(JSON.stringify(readContent, null, '\t'), 'utf8'))
-                  .then(res => {
-                    vscode.window.showInformationMessage(`插入成功`);
-                  });
+          try {
+            message.payload.todoList.forEach(item => {
+              if (item.filePath.split('.')[1] !== 'json' && item.filePath.split('.')[1] !== 'js') {
+                console.log('item.filePath.split( ', item.filePath.split('.')[1]);
+                vscode.window.showWarningMessage(`暂不支持该文件`);
+                return;
               }
-              if (item.fileType === 'object') {
-                const readContent = Buffer.from(readBuffer).toString('utf8');
-                const tempContent = readContent.split('{');
-                const preContent = tempContent[0];
-                console.log('preContent: ', preContent);
-                const objectContent = JSON.parse('{' + tempContent[1]);
-                console.log('objectContent: ', objectContent);
-              }
+              const fileUri = folderUri.with({
+                path: path.posix.join(folderUri.path, item.filePath),
+              });
+              vscode.workspace.fs.readFile(fileUri).then(readBuffer => {
+                // 读到的文件内容
+                if (item.fileType === 'json') {
+                  const readContent = JSON.parse(Buffer.from(readBuffer).toString('utf8'));
+                  readContent[message.payload.text] = item.targetValue;
+                  vscode.workspace.fs
+                    .writeFile(fileUri, Buffer.from(JSON.stringify(readContent, null,'  '), 'utf8'))
+                    .then(res => {
+                      vscode.window.showInformationMessage(`插入成功`);
+                    });
+                }
+                if (item.fileType === 'object') {
+                  vscode.window.showWarningMessage(`暂不支持该文件`);
+                  return;
+                  // const readContent = Buffer.from(readBuffer).toString('utf8');
+                  // const tempContent = readContent.split('default')[1];
+                  // if (tempContent.length > 0) {
+                    
+                  // }else {
+                  //   vscode.window.showWarningMessage(`暂不支持该文件`);
+                  // }
+                }
+              });
             });
-          });
+          } catch (error) {
+            vscode.window.showWarningMessage(`暂不支持改文件`);
+          }
         }
       },
       null,
@@ -180,11 +191,13 @@ export class ViewLoader {
   }
 
   render() {
-    const bundleScriptPath = this.panel.webview.asWebviewUri(
+      const bundleScriptPath = this.panel.webview.asWebviewUri(
       vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app', 'bundle.js'))
-    );
-
-    const gender = getAPIUserGender();
+      );
+      const iconPath = this.panel.webview.asWebviewUri(
+        vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app', 'logo.ico'))
+        );
+        console.log('iconPath: ', iconPath);
 
     return `
       <!DOCTYPE html>
@@ -192,17 +205,14 @@ export class ViewLoader {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Terminus-i18n</title>
+          <title>Terminus</title>
+          <link href="/Users/zl/Studyspace/T-i18n/out/ico/logo.ico" rel="shortcut icon">
         </head>
         
         <body>
           <div id="root"></div>
           <script>
             const vscode = acquireVsCodeApi();
-            const apiUserGender = "${gender}"
-          </script>
-          <script>
-            console.log('apiUserGender', apiUserGender)
           </script>
           <script src="${bundleScriptPath}"></script>
         </body>
